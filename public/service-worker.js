@@ -1,4 +1,4 @@
-const STATIC_NAME = "static-cache-v1";
+const STATIC_CACHE = "static-cache-v1";
 const RUNTIME_CACHE = "data-cache-v1";
 
 const FILES_TO_CACHE = [
