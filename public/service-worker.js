@@ -1,5 +1,5 @@
 const STATIC_NAME = "static-cache-v1";
-const DATA_CACHE_NAME = "data-cache-v1";
+const RUNTIME_CACHE = "data-cache-v1";
 
 const FILES_TO_CACHE = [
   '/',
@@ -14,6 +14,13 @@ const FILES_TO_CACHE = [
 
  
  self.addEventListener("install", event => {
+
+  event.waitUntil(
+    caches
+    .open(RUNTIME_CACHE)
+    .then(cache => cache.add('/api/transaction'))
+  );
+
   event.waitUntil(
     caches.open(STATIC_CACHE).then((cache) => cache.addAll(FILES_TO_CACHE))
   );
@@ -28,8 +35,8 @@ self.addEventListener("activate", event => {
     caches.keys().then(keyList => {
       return Promise.all(
         keyList.map(key => {
-          if (key !== STATIC_CACHE && key !== DATA_STATIC_CACHE) {
-            console.log("Removing old cache data", key);
+          if (key !== STATIC_CACHE && key !== RUNTIME_CACHE) {
+            console.log("Clearing cache data", key);
             return caches.delete(key);
           }
         })
@@ -46,14 +53,13 @@ self.addEventListener('fetch', event => {
 
 
 self.addEventListener("fetch", event => {
-  if (event.request.url.includes("/api/")) {
+  if (event.request.url.includes("/api/transaction")) {
     console.log("[Service Worker] Fetch (data)", event.request.url);
 
     event.respondWith(
-      caches.open(DATA_STATIC_CACHE).then(cache => {
+      caches.open(RUNTIME_CACHE).then(cache => {
         return fetch(event.request)
           .then(response => {
-            // Clone and store is response is sucessful
             if (response.status === 200) {
               cache.put(event.request.url, response.clone());
             }
@@ -76,5 +82,6 @@ self.addEventListener("fetch", event => {
         return response || fetch(event.request);
       });
     })
+    .catch(err => console.log(err))
   );
 });
