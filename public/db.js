@@ -58,13 +58,5 @@ function checkDatabase() {
   };
 };
 
-const saveRecord = record => {
-
-const transaction = db.transaction(['transactions'], 'readwrite');
-const store = transaction.objectStore('transactions');
-
-store.add(record);
-
-};
 
 window.addEventListener("online", checkDatabase);
